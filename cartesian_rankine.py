@@ -11,29 +11,16 @@ import sys
 import os
 
 try:
-    os.listdir('/var/www')
+    os.listdir('/usr')
     windows = False
     sys.path.append('/data/scripts/resources')
-    from case_data import this_case
-    case_date = this_case['date']
-    rda = this_case['rda']
-    base_gis_dir = '/data/GIS'
-
-    case_dir = os.path.join('/data/radar',case_date,rda)
-    base_dst_dir = os.path.join('/var/www/html/radar/images',case_date,rda)
-    mosaic_dir = os.path.join(base_dst_dir,'mosaic')
 except:
     windows = True
     sys.path.append('C:/data/scripts/resources')
-    from case_data import this_case
-    base_gis_dir = 'C:/data/GIS'
-    topDir = 'C:/data'
-    case_date = this_case['date']
-    rda = this_case['rda']
-    case_dir = os.path.join(topDir,case_date,rda)
-    base_dst_dir = os.path.join(topDir,'images',case_date,rda)
-    mosaic_dir = os.path.join(base_dst_dir,'mosaic') 
 
+from reference_data import set_paths
+
+data_dir,image_dir,archive_dir,gis_dir,py_call,placefile_dir = set_paths()
 
 
 import numpy as np
@@ -46,6 +33,8 @@ from matplotlib.ticker import MaxNLocator
 from custom_cmaps import plts
 from scipy.ndimage.filters import gaussian_filter1d
 from matplotlib.collections import LineCollection
+#from my_functions import plot_settings
+plt.rc('ytick', labelsize=14)
 
 class VortexGrid:
         """
@@ -113,7 +102,7 @@ class VortexGrid:
             self.convergence = convergence
             #self.translation = translation
             self.azshear = []
-
+            self.azshear_surge = []
 
             self.x = np.linspace(-1,1,dimension)        
             self.y = np.linspace(-1,1,dimension)
@@ -184,8 +173,16 @@ class VortexGrid:
             self.vorticity_V = [self.vorticity[0]*0,self.vorticity[1]]
             # trace1 refers to plot of V wrt x
             self.rotv_trace = self.V[int(dimension/2)]
+            self.rotv_surge = []
+            for i in range(0,len(self.rotv_trace)):
+                self.val = self.rotv_trace[i]
+                if self.val < 0:
+                    self.rotv_surge.append(1.5*self.val)
+                else:
+                    self.rotv_surge.append(self.val)
+                    
             self.rotv_trace_scaled = self.rotv_trace / (np.max(self.rotv_trace) * 1.05)            
-
+            self.rotv_surge_scaled = self.rotv_surge / (np.max(self.rotv_surge) * 1.05)
         
 
             for r in range(0,len(self.rotv_trace)):
@@ -200,13 +197,40 @@ class VortexGrid:
             self.azshear_smoothed = gaussian_filter1d(self.azshear, sigma=1.5)
 
 
+            for rs in range(0,len(self.rotv_surge)):
+                if rs == 0:
+                    self.azshear_surge_element = 0
+                else:
+                    self.azshear_surge_element = self.rotv_surge[rs] - self.rotv_surge[rs-1]
+                
+                self.azshear_surge.append(self.azshear_surge_element)
 
-test = VortexGrid(200,0.30,0,0)
+            self.azshear_scaled = self.azshear / (np.max(self.azshear) * 1.05)
+            self.azshear_smoothed = gaussian_filter1d(self.azshear, sigma=1)
 
+            self.azshear_surge_scaled = self.azshear_surge / (np.max(self.azshear_surge) * 1.05)
+            self.azshear_surge_smoothed = gaussian_filter1d(self.azshear_surge, sigma=1)
+
+
+#test = VortexGrid(200,0.30,0,0)
+test = VortexGrid(100,0.30,0,0)
+quiver = False
+azshear = True
+rotv  = True
+contour = False
+grid = True
 
 test2 = VortexGrid()
 skip = (slice(None, None, 10), slice(None, None, 10))
 fig, ax = plt.subplots(1,1,figsize=(10,10),sharex=True)
+
+# quivers and density
+# density with which to plot quivers. Greater numbers means more spacing between quivers
+if quiver:
+    skip_val = 14
+    skip = (slice(None, None, skip_val), slice(None, None, skip_val))
+    # plot quivers with substantial alpha
+    plt.quiver(test.xx[skip],test.yy[skip],test.U[skip],test.V[skip],color='k',alpha=0.5,zorder=10)
 
 
 
@@ -221,57 +245,86 @@ vmin = -vmax
 
 # color inbound/outbound
 #continuous color field
-cs = ax.pcolormesh(test.xx,test.yy,test.V,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1)
+#cs = ax.pcolormesh(test.xx,test.yy,test.V,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1)
 # discrete filled contours
-ax.contourf(test.xx,test.yy,test.V,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1)
+if contour:
+    levels = np.arange(-8, 8, 1)
+    ax.contourf(test.xx,test.yy,test.V,levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=0.6)
 
 
-# quivers and density
-# density with which to plot quivers. Greater numbers means more spacing between quivers
-skip_val = 20
-skip = (slice(None, None, skip_val), slice(None, None, skip_val))
 
-# plot quivers with substantial alpha
-plt.quiver(test.xx[skip],test.yy[skip],test.U[skip],test.V[skip],color='k',alpha=0.05,zorder=10)
+
 
 
 
 x = test.x
 y = test.rotv_trace_scaled      # rotational velocity trace
-s = test.azshear_scaled         # azimuthal shear (NROT magnitude)
+ys = test.rotv_surge_scaled
+#ys = np.asarray(test.rotv_surge, dtype=np.float32)
+s = test.azshear_scaled
+ss = test.azshear_surge_scaled   # azimuthal shear (NROT magnitude)
 
 
 norm = plt.Normalize(y.min(), y.max())
-
+norm_surge = plt.Normalize(ys.min(), ys.max())
 
 # rotv plot
-points = np.array([x, y]).T.reshape(-1, 1, 2)
-segments = np.concatenate([points[:-1], points[1:]], axis=1)
-lc = LineCollection(segments, cmap=plts['brown_gray_ramp']['cmap'],norm=norm,zorder=10)
-lc.set_array(y)
-lc.set_linewidth(4)
-line = ax.add_collection(lc)
+if rotv:
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+    lc = LineCollection(segments, cmap=plts['brown_gray_ramp']['cmap'],norm=norm,zorder=10)
+    lc.set_array(y)
+    lc.set_linewidth(4)
+    line = ax.add_collection(lc)
 
+    points_surge = np.array([x, ys]).T.reshape(-1, 1, 2)
+    segments_surge = np.concatenate([points_surge[:-1], points_surge[1:]], axis=1)
+    lc_surge = LineCollection(segments_surge, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_surge,zorder=10)
+    lc_surge.set_array(y)
+    lc_surge.set_linewidth(4)
+    line = ax.add_collection(lc_surge)
 
 
 # azshear plot
-smoothed = gaussian_filter1d(s, sigma=1.8)
-points2 = np.array([x, smoothed]).T.reshape(-1, 1, 2)
-segments2 = np.concatenate([points2[:-1], points2[1:]], axis=1)
-lc_az = LineCollection(segments2, cmap=plts['brown_gray_ramp']['cmap'],norm=norm,zorder=10)
-lc_az.set_array(y)
-lc_az.set_linewidth(4)
-line = ax.add_collection(lc_az)
+if azshear:
+    smoothed = gaussian_filter1d(s, sigma=10)
+    points2 = np.array([x, smoothed]).T.reshape(-1, 1, 2)
+    segments2 = np.concatenate([points2[:-1], points2[1:]], axis=1)
+    lc_az = LineCollection(segments2, cmap=plts['just_gray']['cmap'],norm=norm,alpha=0.2,zorder=10)
+    lc_az.set_array(y)
+    lc_az.set_linewidth(3)
+    line = ax.add_collection(lc_az)
+
+    smoothed_surge = gaussian_filter1d(ss, sigma=5)
+    points_surge = np.array([x, smoothed_surge]).T.reshape(-1, 1, 2)
+    segments_surge = np.concatenate([points_surge[:-1], points_surge[1:]], axis=1)
+    lc_surge = LineCollection(segments_surge, cmap=plts['just_gray']['cmap'],norm=norm_surge,zorder=10)
+    lc_surge.set_array(y)
+    lc_surge.set_linewidth(3)
+    line = ax.add_collection(lc_surge)
 
 
 # plot characteristics
 ax.set_xlim(x.min(), x.max())
 ax.set_ylim(-1.0, 1.0)
 plt.axis('scaled')
-ax.set_yticks([10])
-ax.set_xticks([10])
-ax.grid(False)
-fig.colorbar(cs,shrink=0.85)
 
-plt.show()
+
+ax.set_yticks([0])
+plt.grid(True)
+ax.yaxis.set_ticklabels([])
+ax.yaxis.set_ticks_position('none')
+ax.set_xticks([10])
+if grid:
+    ax.grid(True,color='k', linestyle='-', linewidth=2, alpha=1)
+else:
+    ax.grid(True,color='k', linestyle='-', linewidth=2, alpha=0)
+#cbar = fig.colorbar(cs, ticks=[-4, 0, 4], orientation='vertical',shrink=0.80)
+#cbar.ax.set_yticklabels([' In', ' 0', ' Out']) 
+plt.text(-0.14, -0.97, r'RADAR', fontsize=20,bbox=dict(facecolor='white', alpha=1),zorder=20)
+#plt.title('AzShear', fontsize=20)
+#plt.annotate('RDA', xy=(-0.1, -0.9), xytext=(-0.1, -0.9))
+#plt.show()
+image_dst_path = os.path.join(image_dir,'azshear_trace.png')
+plt.savefig(image_dst_path,format='png',bbox_inches='tight')
             
