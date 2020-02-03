@@ -177,7 +177,7 @@ class VortexGrid:
             for i in range(0,len(self.rotv_trace)):
                 self.val = self.rotv_trace[i]
                 if self.val < 0:
-                    self.rotv_surge.append(1.5*self.val)
+                    self.rotv_surge.append(2*self.val)
                 else:
                     self.rotv_surge.append(self.val)
                     
@@ -276,18 +276,18 @@ if rotv:
     lc.set_array(y)
     lc.set_linewidth(4)
     line = ax.add_collection(lc)
-
-    points_surge = np.array([x, ys]).T.reshape(-1, 1, 2)
-    segments_surge = np.concatenate([points_surge[:-1], points_surge[1:]], axis=1)
-    lc_surge = LineCollection(segments_surge, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_surge,zorder=10)
-    lc_surge.set_array(y)
-    lc_surge.set_linewidth(4)
-    line = ax.add_collection(lc_surge)
+#
+#    points_surge = np.array([x, ys]).T.reshape(-1, 1, 2)
+#    segments_surge = np.concatenate([points_surge[:-1], points_surge[1:]], axis=1)
+#    lc_surge = LineCollection(segments_surge, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_surge,zorder=10)
+#    lc_surge.set_array(y)
+#    lc_surge.set_linewidth(4)
+#    line = ax.add_collection(lc_surge)
 
 
 # azshear plot
 if azshear:
-    smoothed = gaussian_filter1d(s, sigma=10)
+    smoothed = gaussian_filter1d(s, sigma=3)
     points2 = np.array([x, smoothed]).T.reshape(-1, 1, 2)
     segments2 = np.concatenate([points2[:-1], points2[1:]], axis=1)
     lc_az = LineCollection(segments2, cmap=plts['just_gray']['cmap'],norm=norm,alpha=0.2,zorder=10)
@@ -295,7 +295,7 @@ if azshear:
     lc_az.set_linewidth(3)
     line = ax.add_collection(lc_az)
 
-    smoothed_surge = gaussian_filter1d(ss, sigma=5)
+    smoothed_surge = gaussian_filter1d(ss, sigma=3)
     points_surge = np.array([x, smoothed_surge]).T.reshape(-1, 1, 2)
     segments_surge = np.concatenate([points_surge[:-1], points_surge[1:]], axis=1)
     lc_surge = LineCollection(segments_surge, cmap=plts['just_gray']['cmap'],norm=norm_surge,zorder=10)
@@ -327,4 +327,20 @@ plt.text(-0.14, -0.97, r'RADAR', fontsize=20,bbox=dict(facecolor='white', alpha=
 #plt.show()
 image_dst_path = os.path.join(image_dir,'azshear_trace.png')
 plt.savefig(image_dst_path,format='png',bbox_inches='tight')
-            
+
+surge_max = 0
+surge_min = 0
+
+for l in range(0,len(smoothed_surge)):
+    this = smoothed_surge[l]
+    print(str(l) + '   ' + str(this))
+    if this < surge_min:
+        surge_min = this
+        surge_min_loc = l
+    elif this > surge_max:
+        surge_max = this
+        surge_max_loc = l
+    else:
+        pass
+
+print(surge_min,surge_min_loc,surge_max,surge_max_loc)        
