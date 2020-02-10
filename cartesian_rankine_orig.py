@@ -301,22 +301,10 @@ class VortexGrid:
                     pass
 
             self.conv_trace_full_scaled = self.conv_trace_full / (np.max(self.conv_trace_full) * 1.05) 
-            self.convshear = []
-            # convergence shear calculated here by seeing how conv changes wrt y
-            for rc in range(0,len(self.conv_trace_full)):
-                if rc == 0:
-                    self.convshear_element = 0
-                else:
-                    self.convshear_element = self.conv_trace_full[rc] - self.conv_trace_full[rc-1]
-                
-                self.convshear.append(self.convshear_element)
-
-            self.convshear_scaled = self.convshear / (np.max(self.convshear) * 1.05)
-            self.convshear_smoothed = gaussian_filter1d(self.convshear, sigma=4)
 
 #test = VortexGrid(200,0.30,0,0)
-test = VortexGrid(100,0.30,0,0)
-quiver = False
+test = VortexGrid(100,0.30,-1,0)
+quiver = True
 
 azshear = True
 azshear_surge = False
@@ -328,19 +316,9 @@ rotv_full = False
 contour = True
 grid = True
 
-conv_full = True
-
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 #test2 = VortexGrid()
 skip = (slice(None, None, 10), slice(None, None, 10))
-#fig, ax = plt.subplots(1,1,figsize=(10,10),sharex=True)
-fig, ax = plt.subplots(figsize=(5.5, 5.5))
-divider = make_axes_locatable(ax)
-axTracex= divider.append_axes("top", 1.2, pad=0.1,sharex=ax)
-axTracex.set_ylim([-1,1])
-
-axTracey = divider.append_axes("right", 1.2,        pad=0.1, sharey=ax)
-axTracey.set_ylim([-1,1])
+fig, ax = plt.subplots(1,1,figsize=(10,10),sharex=True)
 
 # quivers and density
 # density with which to plot quivers. Greater numbers means more spacing between quivers
@@ -408,18 +386,14 @@ if rotv_full:
     lc_surge.set_linewidth(4)
     line = ax.add_collection(lc_surge)
 
-
+conv_full = True
 if conv_full:
     conv_full = np.array([x, cf]).T.reshape(-1, 1, 2)
-    #conv_full = np.array([x, cf]).reshape(-1, 1, 2)
     segments_conv_full = np.concatenate([conv_full[:-1], conv_full[1:]], axis=1)
-    seg_trans = np.transpose(segments_conv_full)
-    #conv_f = LineCollection(segments_conv_full, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_conv_full,zorder=10)
-    conv_f = LineCollection(seg_trans, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_conv_full,zorder=10)
+    conv_f = LineCollection(segments_conv_full, cmap=plts['brown_gray_ramp']['cmap'],norm=norm_conv_full,zorder=10)
     conv_f.set_array(x)
     conv_f.set_linewidth(4)
-    line = axTracey.add_collection(conv_f)
-    #axTracey.scatter(cf,y)
+    line = ax.add_collection(conv_f)
 
 # azshear plot
 if azshear:
@@ -429,7 +403,7 @@ if azshear:
     lc_az = LineCollection(segments2, cmap=plts['just_gray']['cmap'],norm=norm,alpha=0.4,zorder=10)
     lc_az.set_array(y)
     lc_az.set_linewidth(3)
-    line = axTracex.add_collection(lc_az)
+    line = ax.add_collection(lc_az)
 
 if azshear_surge:
     smoothed_surge = gaussian_filter1d(ss, sigma=8)
@@ -457,7 +431,7 @@ if grid:
 else:
     ax.grid(True,color='k', linestyle='-', linewidth=2, alpha=0)
 
-ax.text(-0.14, -0.97, r'RADAR', fontsize=20,bbox=dict(facecolor='white', alpha=1),zorder=20)
+plt.text(-0.14, -0.97, r'RADAR', fontsize=20,bbox=dict(facecolor='white', alpha=1),zorder=20)
 image_dst_path = os.path.join(image_dir,'azshear_trace.png')
 plt.savefig(image_dst_path,format='png',bbox_inches='tight')
             
