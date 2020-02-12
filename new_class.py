@@ -39,7 +39,6 @@ class VortexGrid2:
             
         # calculate a distance from origin for each grid point
 
-
     @property
     def distance(self):
         dist = np.sqrt(self.xx**2 + self.yy**2)
@@ -76,6 +75,43 @@ class VortexGrid2:
         return 1/(self.distance/self.rotmax_radius)
 
 
+    def masked_inner(self,grid):
+        masked = ma.masked_array(grid,self.distance > self.rotmax_radius)        
+        filled = masked.filled(fill_value=0)
+        return filled
+
+    def masked_outer(self,grid):
+        masked = ma.masked_array(grid,self.distance <= self.rotmax_radius)        
+        filled = masked.filled(fill_value=0)
+        return filled
+
+    def ma_inner(self,grid):
+        ma_grid = self.masked_inner(grid)
+        return ma_grid
+
+    def ma_outer(self,grid):
+        ma_grid = self.masked_outer(grid)
+        return ma_grid
+  
+
+
+    #@property   
+    def rotation_inner(self):
+        u = (-1 * self.inner_radius_factor * self.sin_angle)
+        v = (self.inner_radius_factor * self.cos_angle)
+        u_fill = self.ma_inner(u)
+        v_fill = self.ma_inner(v)
+        return u_fill, v_fill
+
+    #@property   
+    def rotation_outer(self):
+        u = (-1 * self.outer_radius_factor * self.sin_angle)
+        v = (self.outer_radius_factor * self.cos_angle)
+        u_fill = self.ma_outer(u)
+        v_fill = self.ma_outer(v)
+        return u_fill, v_fill
+
+
     @property   
     def convergence_inner(self):
         u = self.inner_radius_factor * self.convergence * self.cos_angle
@@ -96,35 +132,15 @@ class VortexGrid2:
         v_ma = ma.masked_array(v,self.distance > self.rotmax_radius)
         v_ma_fill = v_ma.filled(fill_value=0) 
         return u_ma_fill, v_ma_fill  
-  
-    @property   
-    def rotation_inner(self):
-        u = (-1 * self.inner_radius_factor * self.sin_angle)
-        v = (self.inner_radius_factor * self.cos_angle)
-        u_ma = ma.masked_array(u,self.distance > self.rotmax_radius)
-        u_ma_fill = u_ma.filled(fill_value=0)  
-        v_ma = ma.masked_array(v,self.distance > self.rotmax_radius)
-        v_ma_fill = v_ma.filled(fill_value=0) 
-        return u_ma_fill, v_ma_fill
-
-    @property   
-    def rotation_outer(self):
-        u = (-1 * self.outer_radius_factor * self.sin_angle)
-        v = (self.outer_radius_factor * self.cos_angle)
-        u_ma = ma.masked_array(u,self.distance <= self.rotmax_radius)
-        u_ma_fill = u_ma.filled(fill_value=0)  
-        v_ma = ma.masked_array(v,self.distance <= self.rotmax_radius)
-        v_ma_fill = v_ma.filled(fill_value=0) 
-        return u_ma_fill, v_ma_fill
 
     @property   
     def rot_U(self):
-        rot_U = self.rotation_inner[0] + self.rotation_outer[0]
+        rot_U = self.rotation_inner()[0] + self.rotation_outer()[0]
         return rot_U
 
     @property    
     def rot_V(self):
-        rot_V = self.rotation_inner[1] + self.rotation_outer[1]
+        rot_V = self.rotation_inner()[1] + self.rotation_outer()[1]
         return rot_V
 
     def translation_factor(self):
@@ -155,4 +171,24 @@ class VortexGrid2:
             else:
                 pass
         return min_index,max_index
-        
+    
+
+#    @property   
+#    def rotation_inner(self):
+#        u = (-1 * self.inner_radius_factor * self.sin_angle)
+#        v = (self.inner_radius_factor * self.cos_angle)
+#        u_ma = ma.masked_array(u,self.distance > self.rotmax_radius)
+#        u_ma_fill = u_ma.filled(fill_value=0)  
+#        v_ma = ma.masked_array(v,self.distance > self.rotmax_radius)
+#        v_ma_fill = v_ma.filled(fill_value=0) 
+#        return u_ma_fill, v_ma_fill
+
+#    @property   
+#    def rotation_outer(self):
+#        u = (-1 * self.outer_radius_factor * self.sin_angle)
+#        v = (self.outer_radius_factor * self.cos_angle)
+#        u_ma = ma.masked_array(u,self.distance <= self.rotmax_radius)
+#        u_ma_fill = u_ma.filled(fill_value=0)  
+#        v_ma = ma.masked_array(v,self.distance <= self.rotmax_radius)
+#        v_ma_fill = v_ma.filled(fill_value=0) 
+#        return u_ma_fill, v_ma_fill
