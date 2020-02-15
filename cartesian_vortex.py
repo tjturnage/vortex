@@ -28,8 +28,12 @@ from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from scipy.ndimage.filters import gaussian_filter1d
 from custom_cmaps import plts
-cmap = plts['brown_gray_ramp']['cmap']
-
+green_white_pink = plts['green_white_pink']['cmap']
+green_gray_pink = plts['green_gray_pink']['cmap']
+az_cmap = plts['AzShear_Simple']['cmap']
+az_gray_cmap = plts['AzShear_Simple_Gray']['cmap']
+az_rank_cmap = plts['AzDiv']['cmap']
+gray_cmap = plts['just_gray']['cmap']
 ###############################################################################################
 
 class VortexGrid2:
@@ -188,7 +192,7 @@ class VortexGrid2:
         return conv_mag/(np.max(conv_mag) * 1.05)
 
     @property 
-    def conv_U_trace(self):    
+    def convergence_U_trace(self):    
         if self.dimension%2 == 0:
             i = self.dimension/2
         else:
@@ -198,9 +202,8 @@ class VortexGrid2:
         final2 = -1.0 * final
         return final2
 
-    def conv_U_trace_plot(self):
-        pl = self.plot_collections(self.conv_U_trace)
-        pl.set_cmap(plts['just_gray']['cmap'])
+    def convergence_U_trace_plot(self):
+        pl = self.plot_collections(self.convergence_U_trace,6,gray_cmap)
         pl.set_linewidth(3)
         pl.set_alpha(0.6)
         plt.grid(True, lw=9, linestyle='-', color='w', alpha=0.3)
@@ -208,7 +211,7 @@ class VortexGrid2:
         return
 
     @property 
-    def conv_V_trace(self):    
+    def convergence_V_trace(self):    
         if self.dimension%2 == 0:
             i = self.dimension/2
         else:
@@ -220,28 +223,25 @@ class VortexGrid2:
 
     def convergence_speed_plot(self):
         levels = np.arange(-1, 1, 0.01)
-        cmap = plts['DivShear_Storm_Simple']['cmap']
         vmax = np.max(self.convergence_speed)
         vmin = np.min(self.convergence_speed)
-        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
 
 
     def convergence_U_speed_plot(self):
         levels = np.arange(-1, 1, 0.01)
-        cmap = plts['DivShear_Storm_Simple']['cmap']
         vmax = np.max(self.convergence_speed)
         vmin = np.min(self.convergence_speed)
-        ax.contourf(self.xx,self.yy,self.convergence_U_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_U_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_U_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_U_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
 
     def convergence_V_speed_plot(self):
         levels = np.arange(-1, 1, 0.01)
-        cmap = plts['DivShear_Storm_Simple']['cmap']
         vmax = np.max(self.convergence_speed)
         vmin = np.min(self.convergence_speed)
-        ax.contourf(self.xx,self.yy,self.convergence_V_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_V_speed,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_V_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.convergence_V_speed,levels=levels,vmin=vmin,cmap=div_cmap, vmax=vmax,zorder=1, alpha=1)
 
     def quiver_convergence(self):
         plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.convergence_U[self.skip()],self.convergence_V[self.skip()],color='k',alpha=0.5,zorder=10)
@@ -308,8 +308,7 @@ class VortexGrid2:
 
 
     def rotation_V_trace_plot(self):
-        pl = self.plot_collections(self.rotation_V_trace)
-        pl.set_cmap(plts['brown_gray_ramp']['cmap'])
+        pl = self.plot_collections(self.rotation_V_trace,2,green_gray_pink)
         pl.set_linewidth(6)
         pl.set_alpha(0.6)
         line = ax.add_collection(pl)
@@ -328,27 +327,19 @@ class VortexGrid2:
         return min_index,max_index
 
 
-    def rotation_V_contour(self):
-        levels = np.arange(-8, 8, 1)
-        cmap = plts['brown_ramp']['cmap']
-        vmax = np.max(self.rotation_V)
-        vmin = np.min(self.rotation_V)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=0.3)
-        return
-
     def rotation_V_contour_plot(self):
-        levels = np.arange(-10, 10, 0.1)
-        cmap = plts['DivShear_Storm_Simple']['cmap']
+        levels = np.arange(-8, 8, 1)
         vmax = np.max(self.rotation_V)
         vmin = np.min(self.rotation_V)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.25)
+        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.25)
         return
     
 
 
     def quiver_rotation(self):
-        plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='w',alpha=0.3,zorder=10)
+        #plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='k',alpha=0.6,zorder=10)
+        plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='w',alpha=0.4,zorder=10)   # used with Azshear
 
     def quiver_v_rotation(self):
         plt.quiver(self.xx[self.skip2()],self.yy[self.skip2()],0,self.rotation_V[self.skip2()],color='k',alpha=0.5,zorder=10)
@@ -395,7 +386,7 @@ class VortexGrid2:
 
 
     @property
-    def azshear(self):
+    def azshear_trace(self):
         self.derivative = []
         for i in range(0,len(self.rotation_V_trace)):
             if i == 0:
@@ -404,8 +395,20 @@ class VortexGrid2:
                 element = self.rotation_V_trace[i] - self.rotation_V_trace[i - 1]
             self.derivative.append(element)
         self.derivative[0] = self.derivative[-1]
-        final = self.scale_trace(self.derivative)
+        smoothed = gaussian_filter1d(self.derivative, sigma=10)
+        final = self.scale_trace(smoothed)
         return final
+
+    def azshear_trace_plot(self):
+
+        pl = self.plot_collections(self.azshear_trace,9,az_cmap)        
+        #vmax = np.max(self.azshear_trace) + 0.2
+        #vmin = np.min(self.azshear_trace)
+        pl.set_linewidth(6)
+        pl.set_alpha(0.6)
+        #pl.set_clim(vmin=vmin,vmax=vmax)
+        line = ax.add_collection(pl)
+        return
 
     @property
     def azshear_V_full(self):
@@ -428,64 +431,45 @@ class VortexGrid2:
         return final
 
     def azshear_V_full_contour_plot(self):
-        levels = np.arange(-1, 1.15, 0.1)
-        cmap = plts['AzShear_Simple']['cmap']
+        levels = np.arange(-1.1, 1.1, 0.05)
         vmax = np.max(self.azshear_V_full) + 0.2
         vmin = np.min(self.azshear_V_full)
-        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=az_cmap, vmax=vmax,zorder=1, alpha=1)
+        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=az_cmap, vmax=vmax,zorder=1, alpha=1)
         return
 
     @property
-    def divshear(self):
+    def divshear_trace(self):
         self.derivative = []
-        for i in range(0,len(self.conv_U_trace)):
+        for i in range(0,len(self.convergence_U_trace)):
             if i == 0:
                 element = 0
             else:
-                element = self.conv_U_trace[i] - self.conv_U_trace[i - 1]
+                element = self.convergence_U_trace[i] - self.convergence_U_trace[i - 1]
             self.derivative.append(element)
         self.derivative[0] = self.derivative[-1]
         final = self.scale_trace(self.derivative)
         return final
 
-    def plot_collect(self,s):
-        smoothed = gaussian_filter1d(s, sigma=1)
+    def plot_collect(self,s,sig,cmap):
+        norm = plt.Normalize(-1, 1)
+        norm = plt.Normalize(np.min(s), np.max(s))
+        smoothed = gaussian_filter1d(s, sigma=sig)
         points = np.array([self.x, smoothed]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        lc = LineCollection(segments, cmap=plts['brown_gray_ramp']['cmap'],alpha=0.4,zorder=10)
-        lc.set_array(self.y)
+        lc = LineCollection(segments, cmap=cmap,norm=norm,alpha=0.4,zorder=10)
+        lc.set_array(s)
         lc.set_linewidth(3)
+        line = ax.add_collection(lc)
         return lc
 
-    def plot_collections(self,s):
-        p_cols = self.plot_collect(s)
+    def plot_collections(self,s,sig,cmap):
+        p_cols = self.plot_collect(s,sig,cmap)
         return p_cols
 
-    def plot_collect_conv(self,s):
-        smoothed = gaussian_filter1d(s, sigma=9)
-        points = np.array([self.x, smoothed]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        lc = LineCollection(segments, cmap=plts['brown_gray_ramp']['cmap'],alpha=0.4,zorder=10)
-        lc.set_array(self.y)
-        lc.set_linewidth(3)
-        return lc
 
-    def plot_collections_conv(self,s):
-        p_cols = self.plot_collect_conv(s)
-        return p_cols
-    
-    def azshear_plot(self):
-        pl = self.plot_collections(self.azshear)
-        pl.set_cmap(plts['brown_gray_ramp']['cmap'])
-        pl.set_linewidth(6)
-        pl.set_alpha(0.6)
-        line = ax.add_collection(pl)
-        return
-
-    def divshear_plot(self):
-        pl = self.plot_collections_conv(self.divshear)
-        pl.set_cmap(plts['DivShear_Storm']['cmap'])
+    def divshear_trace_plot(self):
+        pl = self.plot_collections(self.divshear_trace,6,div_cmap)
         pl.set_linewidth(6)
         pl.set_alpha(0.6)
         line = ax.add_collection(pl)
@@ -504,28 +488,56 @@ class VortexGrid2:
 test = None
 test = VortexGrid2()
 fig, ax = plt.subplots(1,1,figsize=(10,10),sharex=True)
-plt.xlim(-1.0,1.0)
-plt.ylim(-1.0,1.0)
+# plot characteristics
 plt.axis('scaled')
 ax.set_yticks([0])
+ax.set_xticks([10])
 plt.grid(True)
 ax.yaxis.set_ticklabels([])
 ax.yaxis.set_ticks_position('none')
-ax.set_xticks([10])
-ax.text(-0.14, -0.97, r'RADAR', fontsize=20,bbox=dict(facecolor='white', alpha=1),zorder=20) 
+ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolor='white', alpha=1),zorder=20) 
+
+################################################################
+# ---- quiver black 0.6 alpha ------
+
+#test.rotation_V_contour_plot()
+#test.quiver_rotation()
+#fig_name='rotation_v_quiver.png'
+
+################################################################
+# rotation contour alpha = 0.8
+#test.rotation_V_contour_plot()
+#test.rotation_V_trace_plot()
+#ax.grid(color='k', linestyle='-', linewidth=2)
+#fig_name='rotation_v_trace.png'
+
+################################################################
+#test.rotation_V_contour_plot()  # alpha set to 0.25
+#test.rotation_V_trace_plot()    
+#test.azshear_trace_plot()
+#fig_name='azshear_trace.png'
+################################################################
 
 test.azshear_V_full_contour_plot()
+test.rotation_V_trace_plot()    
 test.quiver_rotation()
+fig_name='azshear_full.png'
 #test.quiver_v_convergence()
 #test.rotation_V_contour_plot()
 #test.convergence_V_speed_plot()
-#test.conv_U_trace_plot()
-#test.conv_U_trace_plot()
+#test.convergence_speed_plot()
+
+#test.convergence_U_trace_plot()
 #test.divshear_plot()
-#test.rot_V_contour()
-#test.rot_V_trace_plot()
-#test.azshear_plot()
+
+#test.rotation_V_trace_plot()
+
+#test.divshear_trace_plot()
 #azshear = test.arr_deriv(test.rot_V_trace())
 
-image_dst_path = os.path.join(image_dir,'conv_vv.png')
+ax.set_xlim(-1.0, 1.0)
+ax.set_ylim(-1.0, 1.0)
+plt.tight_layout()
+image_dst_path = os.path.join(image_dir,fig_name)
 plt.savefig(image_dst_path,format='png',bbox_inches='tight')
+
