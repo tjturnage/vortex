@@ -331,8 +331,8 @@ class VortexGrid2:
         levels = np.arange(-8, 8, 1)
         vmax = np.max(self.rotation_V)
         vmin = np.min(self.rotation_V)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.25)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.25)
+        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.8)
+        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.8)
         return
     
 
@@ -492,7 +492,7 @@ fig, ax = plt.subplots(1,1,figsize=(10,10),sharex=True)
 plt.axis('scaled')
 ax.set_yticks([0])
 ax.set_xticks([10])
-plt.grid(True)
+plt.grid(False)
 ax.yaxis.set_ticklabels([])
 ax.yaxis.set_ticks_position('none')
 ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolor='white', alpha=1),zorder=20) 
@@ -508,20 +508,25 @@ ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolo
 # rotation contour alpha = 0.8
 #test.rotation_V_contour_plot()
 #test.rotation_V_trace_plot()
-#ax.grid(color='k', linestyle='-', linewidth=2)
-#fig_name='rotation_v_trace.png'
+#ax.grid(color='k', linestyle='--', alpha=0.4,linewidth=4)
+#circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
+#ax.add_artist(circle)
+#fig_name='circle_rotv_trace.png'
 
 ################################################################
 #test.rotation_V_contour_plot()  # alpha set to 0.25
-#test.rotation_V_trace_plot()    
-#test.azshear_trace_plot()
-#fig_name='azshear_trace.png'
+test.rotation_V_trace_plot()    
+test.azshear_trace_plot()
+ax.grid(color='k', linestyle='--', alpha=0.4,linewidth=4)
+circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
+ax.add_artist(circle)
+fig_name='azshear_trace.png'
 ################################################################
 
-test.azshear_V_full_contour_plot()
-test.rotation_V_trace_plot()    
-test.quiver_rotation()
-fig_name='azshear_full.png'
+#test.azshear_V_full_contour_plot()
+#test.rotation_V_trace_plot()    
+#test.quiver_rotation()
+#fig_name='azshear_full.png'
 #test.quiver_v_convergence()
 #test.rotation_V_contour_plot()
 #test.convergence_V_speed_plot()
