@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Feb 11 09:55:03 2020
 @author: thomas.turnage
@@ -35,7 +34,7 @@ green_gray_pink = plts['green_gray_pink']['cmap']
 blue_black_red = plts['blue_black_red']['cmap']
 red_black_blue = plts['red_black_blue']['cmap']
 blue_gray_red = plts['blue_gray_red']['cmap']
-divy = plts['DivShear_Storm']['cmap']
+divy = plts['red_black_blue']['cmap']
 white_brown = plts['white_brown']['cmap']
 ###############################################################################################
 
@@ -155,6 +154,18 @@ class VortexGrid2:
     ###########################  Convergence #########################
     ##################################################################
 
+    def contour_plot(self,field,cmap,levels,alpha):
+        #levels = np.arange(-2.01, 2.01, 0.2)        
+        vmax = np.max(field)
+        vmin = np.min(field)
+        ax.contourf(self.xx,self.yy,field,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=alpha)
+        ax.contourf(self.xx,self.yy,field,levels=levels,vmin=vmin,cmap=cmap, vmax=vmax,zorder=1, alpha=alpha)
+        return
+
+    def do_contour_plot(self,field,cmap,levels,alpha):
+        do_plot = self.contour_plot(field,cmap,levels,alpha)
+        return do_plot
+
     @property   
     def convergence_inner(self):
         u = self.inner_radius_factor * self.convergence * self.cos_angle
@@ -183,12 +194,9 @@ class VortexGrid2:
         return conv_V
 
     def convergence_V_contour_plot(self):
-        levels = np.arange(-2.01, 2.01, 0.2)
-        vmax = np.max(self.convergence_V)
-        vmin = np.min(self.convergence_V)
-        ax.contourf(self.xx,self.yy,self.convergence_V,levels=levels,vmin=vmin,cmap=red_black_blue, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_V,levels=levels,vmin=vmin,cmap=red_black_blue, vmax=vmax,zorder=1, alpha=1)
-        return
+        levels = np.arange(-8, 8, 0.5)
+        cn = self.do_contour_plot(self.convergence_V,green_white_pink,levels,1)
+        return cn
 
     @property   
     def convergence_speed(self):
@@ -242,11 +250,8 @@ class VortexGrid2:
 
     def linear_convergence_contour_plot(self):
         levels = np.arange(-1.01, 1.01, 0.01)
-        vmax = np.max(self.linear_convergence_array)
-        vmin = np.min(self.linear_convergence_array)
-        ax.contourf(self.xx,self.yy,self.linear_convergence_array,levels=levels,vmin=vmin,cmap=divy, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.linear_convergence_array,levels=levels,vmin=vmin,cmap=divy, vmax=vmax,zorder=1, alpha=1)
-        return    
+        cp = self.do_contour_plot(self.linear_convergence_array,green_white_pink,levels,1)
+        return cp
 
     def quiver_linear(self):
         #plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='k',alpha=0.6,zorder=10)
@@ -274,32 +279,21 @@ class VortexGrid2:
         return final
 
     def convergence_V_full_contour_plot(self):
-        levels = np.arange(-2.01, 2.01, 0.2)
-        vmax = np.max(self.convergence_V_full)
-        vmin = np.min(self.convergence_V_full)
-        ax.contourf(self.xx,self.yy,self.convergence_V_full,levels=levels,vmin=vmin,cmap=red_black_blue, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_V_full,levels=levels,vmin=vmin,cmap=red_black_blue, vmax=vmax,zorder=1, alpha=1)
-        return
+        levels = np.arange(-1, 1, 0.01)
+        cv = self.do_contour_plot(self.convergence_V_full,red_black_blue,levels,1)
+        return cv
+
 
     def convergence_speed_plot(self):
-
         levels = np.arange(-1, 1, 0.01)
-        vmax = np.max(self.convergence_speed)
-        vmin = np.min(self.convergence_speed)
-        #norm = cm.colors.Normalize(vmax=vmax, vmin=vmin)
-        #im = ax.imshow(self.convergence_speed, interpolation='nearest',cmap=white_brown, norm=norm)
-        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=white_brown, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.convergence_speed,levels=levels,vmin=vmin,cmap=white_brown, vmax=vmax,zorder=1, alpha=1)
+        cv = self.do_contour_plot(self.convergence_speed,white_brown,levels,1)
+        return cv
         #fig.colorbar(im, ax=ax,shrink=0.75,ticks=[100])
 
     def convergence_V_plot(self):
         levels = np.arange(-1.001, 1.001, 0.1)
-        vmax = np.max(self.convergence_V)
-        vmin = np.min(self.convergence_V)
-        #ax.contourf(self.xx,self.yy,self.convergence_V,levels=levels,vmin=vmin,cmap=green_white_brown, vmax=vmax,zorder=1, alpha=1)
-        #ax.contourf(self.xx,self.yy,self.convergence_V,levels=levels,vmin=vmin,cmap=green_white_brown, vmax=vmax,zorder=1, alpha=1)
-        ax.contour(self.xx,self.yy,self.convergence_V,vmin=vmin,cmap=green_white_brown, vmax=vmax,zorder=1, alpha=1)
-        ax.contour(self.xx,self.yy,self.convergence_V,vmin=vmin,cmap=green_white_brown, vmax=vmax,zorder=1, alpha=1)
+        cv = self.do_contour_plot(self.convergence_V,green_white_brown,levels,1)
+        return cv
 
     def quiver_convergence_full(self):
         plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.convergence_U[self.skip()],self.convergence_V[self.skip()],color='k',alpha=0.8,zorder=10)
@@ -387,11 +381,8 @@ class VortexGrid2:
 
     def rotation_V_contour_plot(self):
         levels = np.arange(-8, 8, 1)
-        vmax = np.max(self.rotation_V)
-        vmin = np.min(self.rotation_V)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.8)
-        ax.contourf(self.xx,self.yy,self.rotation_V,levels=levels,vmin=vmin,cmap=green_white_pink, vmax=vmax,zorder=1, alpha=0.8)
-        return
+        cv = self.do_contour_plot(self.rotation_V,green_white_pink,levels,0.8)
+        return cv
     
 
 
@@ -490,13 +481,10 @@ class VortexGrid2:
 
     def azshear_V_full_contour_plot(self):
         levels = np.arange(-1.1, 1.1, 0.05)
-        vmax = 1.5
-        vmin = -1.5
-        #vmax = np.max(self.azshear_V_full) + 0.2
-        #vmin = np.min(self.azshear_V_full)
-        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=blue_black_red, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.azshear_V_full,levels=levels,vmin=vmin,cmap=blue_black_red, vmax=vmax,zorder=1, alpha=1)
-        return
+        #vmax = 1.5
+        #vmin = -1.5
+        cp = self.do_contour_plot(self.azshear_V_full,blue_black_red,levels,1)
+        return cp
 
 
     @property
@@ -523,15 +511,13 @@ class VortexGrid2:
 
     def divshear_V_full_contour_plot(self):
         levels = np.arange(-1.1, 1.1, 0.05)
-        vmax = np.max(self.divshear_V_full)
-        vmin = np.min(self.divshear_V_full)
-        #vmax = np.max(self.divshear_V_full)
-        #vmin = np.min(self.divshear_V_full)
-        vmax = 1.5
-        vmin = -1.5
-        ax.contourf(self.xx,self.yy,self.divshear_V_full,levels=levels,vmin=vmin,cmap=blue_black_red, vmax=vmax,zorder=1, alpha=1)
-        ax.contourf(self.xx,self.yy,self.divshear_V_full,levels=levels,vmin=vmin,cmap=blue_black_red, vmax=vmax,zorder=1, alpha=1)
-        return
+        cp = self.do_contour_plot(self.divshear_V_full,blue_black_red,levels,1)
+        return cp
+
+    def divshear_V_full_contour_plot(self):
+        levels = np.arange(-1.1, 1.1, 0.05)
+        cp = self.do_contour_plot(self.divshear_V_full,blue_black_red,levels,1)
+        return cp
 
     @property
     def divshear_V_trace(self):
@@ -590,7 +576,7 @@ ax.set_xticks([10])
 plt.grid(False)
 ax.yaxis.set_ticklabels([])
 ax.yaxis.set_ticks_position('none')
-#ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolor='white', alpha=1),zorder=20) 
+ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolor='white', alpha=1),zorder=20) 
 
 ################################################################
 # ---- quiver black 0.6 alpha ------
@@ -614,7 +600,7 @@ ax.yaxis.set_ticks_position('none')
 #test.azshear_trace_plot()
 #test.azshear_V_full_contour_plot()
 #ax.grid(color='k', linestyle='--', alpha=0.4,linewidth=4)
-circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.7,linewidth=4,linestyle='--',fill=False)
+circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
 ax.add_artist(circle)
 #fig_name='azshear_trace.png'
 ################################################################
@@ -623,21 +609,24 @@ ax.add_artist(circle)
 #test.rotation_V_trace_plot()    
 #test.quiver_rotation_full()
 #fig_name='azshear_full.png'
-
+#test.divshear_V_trace_plot()
 ################################################################
 #test.convergence_speed_plot()
 #test.quiver_convergence_full()
 fig_name='conv_speed.png'
 ################################################################
 
-test.linear_convergence_contour_plot()
-test.quiver_linear()
+
+#test.linear_convergence_contour_plot()
+#test.quiver_linear()
 
 
 
 #test.convergence_U_trace_plot()
 #test.divshear_V_trace_plot()
-#test.divshear_V_full_contour_plot()
+test.divshear_V_full_contour_plot()
+#test.convergence_V_contour_plot()
+test.quiver_convergence_V()
 #test.rotation_V_trace_plot()
 
 #test.divshear_trace_plot()
@@ -648,4 +637,3 @@ ax.set_ylim(-1.0, 1.0)
 plt.tight_layout()
 image_dst_path = os.path.join(image_dir,fig_name)
 plt.savefig(image_dst_path,format='png',bbox_inches='tight')
-
