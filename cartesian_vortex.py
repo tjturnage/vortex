@@ -19,11 +19,14 @@ from reference_data import set_paths
 data_dir,image_dir,archive_dir,gis_dir,py_call,placefile_dir = set_paths()
 
 
+sys.setrecursionlimit(10000)
+
 import numpy as np
 import numpy.ma as ma
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib.colors import BoundaryNorm
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from matplotlib import cm
 from matplotlib.ticker import MaxNLocator
 from scipy.ndimage.filters import gaussian_filter1d
@@ -70,6 +73,7 @@ class VortexGrid2:
         self.x = np.linspace(-1,1,dimension)        
         self.y = np.linspace(-1,1,dimension)
         self.xx,self.yy = np.meshgrid(self.x,self.y)
+        self.rotmax_index = self.rotmax_fraction * self.dimension
         # set up x and y grids and mesh them into a 2d grid
 
 
@@ -340,6 +344,12 @@ class VortexGrid2:
         rot_V = self.rotation_inner()[1] + self.rotation_outer()[1]
         return rot_V
 
+    @property    
+    def rotation_V_scaled(self):
+        rot_V = self.rotation_inner()[1] + self.rotation_outer()[1]
+        scaled = rot_V/np.max(rot_V)
+        return scaled
+
     @property 
     def rotation_V_trace(self):    
         if self.dimension%2 == 0:
@@ -384,7 +394,9 @@ class VortexGrid2:
         cv = self.do_contour_plot(self.rotation_V,green_white_pink,levels,0.8)
         return cv
     
-
+    def quiver_rotation_surge(self):
+        #plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='k',alpha=0.6,zorder=10)
+        plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_surge_full[self.skip()],self.rotation_surge_full[self.skip()],color='w',alpha=0.4,zorder=10)   # used with Azshear
 
     def quiver_rotation_full(self):
         #plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_U[self.skip()],self.rotation_V[self.skip()],color='k',alpha=0.6,zorder=10)
@@ -479,12 +491,129 @@ class VortexGrid2:
         final = self.scale_trace(self.derivative)
         return final
 
+
+    @property
+    def azshear_V_surge(self):
+        self.derivative = []
+        for r in range(0,self.dimension):
+            self.this_row = []
+            self.this_list = self.rotation_surge_V[r].tolist()
+
+            for i in range(0,self.dimension):
+                if i == 0:
+                    element = 0
+                else:
+                    element = self.this_list[i] - self.this_list[i - 1]
+                self.this_row.append(element)
+
+            self.this_row[0] = self.this_row[-1]
+            smoothed = gaussian_filter1d(self.this_row, sigma=10)
+            self.derivative.append(smoothed)
+        final = self.scale_trace(self.derivative)
+        return final
+
+
+
+    def azshear_surge_full_contour_plot(self):
+        levels = np.arange(-5.1, 10.1, 0.05)
+        #vmax = 1.5
+        #vmin = -1.5
+        cp = self.do_contour_plot(self.azshear_V_surge,blue_black_red,levels,1)
+        return cp
+
     def azshear_V_full_contour_plot(self):
         levels = np.arange(-1.1, 1.1, 0.05)
         #vmax = 1.5
         #vmin = -1.5
         cp = self.do_contour_plot(self.azshear_V_full,blue_black_red,levels,1)
         return cp
+
+
+
+
+    #######################################################################
+    @property
+    def rotation_surge_V(self):
+        printed = True
+        self.surge_factor = 1.0
+        self.surge_full = []
+        for d in range(0,self.dimension):
+            row = []
+            rotv = self.rotation_V[d]
+            v_min = np.argmin(rotv)
+            v_max = np.argmax(rotv)
+            surge_weight = 1 - np.abs(d*0.5/self.dimension)
+            abs_min = (self.surge_factor + 1) * np.min(rotv)
+            abs_max = np.max(rotv)
+            diff = abs_max - abs_min
+            print(diff)
+            if (v_max - v_min) > self.dimension/20:# and v_min > self.dimension * 0.05:
+                for r in range(0,len(rotv)):
+                    val = rotv[r]
+    
+                    if r < v_min:
+                        val_factor = (r/v_min)
+                        val_new = (1 + (self.surge_factor)*(val_factor)) * val
+
+                        #val_new = val * (1 + (self.surge_factor*r/v_min))
+                        #val_new = 2 * val
+                        row.append(val_new)
+                    elif r >=  v_min and r <= v_max:
+                        rise = (abs_max - abs_min)/(v_max - v_min)
+ 
+                        val_new = abs_min + (r - v_min) * rise
+
+
+                        row.append(val_new)
+                    else:
+                        row.append(val)
+
+                    #ow[0] = row[-1]
+                smoothed = gaussian_filter1d(row, sigma=1)
+                self.surge_full.append(smoothed)
+
+            else:
+                if printed:
+                    pass
+                else:
+                    print(rotv)
+                    printed = True
+                self.surge_full.append(rotv)
+        scaled = self.scale_trace(self.surge_full)
+        return scaled
+
+
+    @property
+    def azshear_surge_full(self):
+        self.derivative = []
+        for r in range(0,self.dimension):
+            self.this_row = []
+            self.this_list = self.rotation_surge_V[r].tolist()
+
+            for i in range(0,len(self.this_list)):
+                if i == 0:
+                    element = 0
+                else:
+                    element = self.this_list[i] - self.this_list[i - 1]
+                self.this_row.append(element)
+
+            self.this_row[0] = self.this_row[-1]
+            smoothed = gaussian_filter1d(self.this_row, sigma=10)
+            self.derivative.append(smoothed)
+        final = self.scale_trace(self.derivative)
+        return final
+
+    def rotation_surge_V_contour_plot(self):
+        levels = np.arange(-3.1, 3.1, 0.2)
+        cp = self.do_contour_plot(self.rotation_surge_V,green_white_pink,levels,1)
+        return cp
+
+
+
+    @property
+    def rotation_surge_trace(self,trace):
+        rs = self.rotation_surge_trace_f(trace)
+        return rs
 
 
     @property
@@ -514,10 +643,6 @@ class VortexGrid2:
         cp = self.do_contour_plot(self.divshear_V_full,blue_black_red,levels,1)
         return cp
 
-    def divshear_V_full_contour_plot(self):
-        levels = np.arange(-1.1, 1.1, 0.05)
-        cp = self.do_contour_plot(self.divshear_V_full,blue_black_red,levels,1)
-        return cp
 
     @property
     def divshear_V_trace(self):
@@ -564,6 +689,50 @@ class VortexGrid2:
         ts = self.scale_trace_f(t)
         return ts
 
+
+
+
+    from matplotlib.ticker import LinearLocator, FormatStrFormatter
+
+
+
+    def three_d(self):
+        levels1 = np.arange(-2.01,2.01,0.4)
+        levels2 = np.arange(-2.01,2.01,0.2)
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+
+        # Make data.
+        Z = test.rotation_surge_V
+        Zz = test.rotation_V_scaled
+    
+        # Plot the surface.
+        #surf = ax.plot_surface(test.xx, test.yy, Z, cmap=green_white_pink,linewidth=0, antialiased=False)
+        #surf = ax.plot_surface(test.xx, test.yy, Z, vmin=-2,vmax=2,cmap=green_gray_pink,alpha=0.25,linewidth=0, antialiased=False)    
+        #cset = ax.contourf(test.xx, test.yy, Z, vmin=-2,vmax=2,levels=levels1,zdir='z', offset=-2.5, cmap=green_gray_pink)
+
+        surf = ax.plot_surface(test.xx, test.yy, Zz,vmin=-2,vmax=2, cmap=green_gray_pink,alpha=0.2,linewidth=0, antialiased=False)    
+        cset = ax.contourf(test.xx, test.yy, Zz,vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.5, cmap=green_white_pink)    
+
+       #ax.plot_wireframe(test.xx, test.yy, Z, cmap=green_white_pink,alpha=0.3,rcount=10, ccount=0)
+        #ax.plot_wireframe(test.xx, test.yy, Zz, cmap=green_white_pink,alpha=0.3,rcount=10, ccount=0)
+        # Customize the z axis.
+        ax.grid(True)
+        #ax.axis("scaled")
+        ax.set_zlim(-2.5, 1.01)
+        #ax.zaxis.set_major_locator(LinearLocator(10))
+        #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+        ax.set_zticks([-2, -1,0, 1])
+        ax.set_xticks([-1,0,1])
+        ax.set_yticks([-1,0,1])
+        ax.view_init(22, 290)
+        #plt.draw()
+        #plt.pause(.001)    
+        # Add a color bar which maps values to colors.
+        #fig.colorbar(surf, shrink=0.5, aspect=5)
+        #savefig()
+        plt.show()
+        return
 ###############################################################################################
 
 test = None
@@ -590,8 +759,8 @@ ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolo
 #test.rotation_V_contour_plot()
 #test.rotation_V_trace_plot()
 #ax.grid(color='k', linestyle='--', alpha=0.4,linewidth=4)
-#circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
-#ax.add_artist(circle)
+circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
+ax.add_artist(circle)
 #fig_name='circle_rotv_trace.png'
 
 ################################################################
@@ -600,14 +769,15 @@ ax.text(-0.14, -0.97, r'RADAR', fontsize=22,fontweight='bold',bbox=dict(facecolo
 #test.azshear_trace_plot()
 #test.azshear_V_full_contour_plot()
 #ax.grid(color='k', linestyle='--', alpha=0.4,linewidth=4)
-circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
-ax.add_artist(circle)
+#circle = plt.Circle((0, 0), test.rotmax_radius, color='k', alpha=0.3,linewidth=4,fill=False)
+#ax.add_artist(circle)
 #fig_name='azshear_trace.png'
 ################################################################
 
-#test.azshear_V_full_contour_plot()
+#azshear_surge_full_contour_plot
+#test.azshear_surge_full_contour_plot()
 #test.rotation_V_trace_plot()    
-#test.quiver_rotation_full()
+#test.quiver_rotation_surge()
 #fig_name='azshear_full.png'
 #test.divshear_V_trace_plot()
 ################################################################
@@ -621,17 +791,18 @@ fig_name='conv_speed.png'
 #test.quiver_linear()
 
 
+#test.rotation_surge_V_contour_plot()
 
 #test.convergence_U_trace_plot()
 #test.divshear_V_trace_plot()
-test.divshear_V_full_contour_plot()
+#test.divshear_V_full_contour_plot()
 #test.convergence_V_contour_plot()
 test.quiver_convergence_V()
 #test.rotation_V_trace_plot()
 
 #test.divshear_trace_plot()
 
-
+test.three_d()
 ax.set_xlim(-1.0, 1.0)
 ax.set_ylim(-1.0, 1.0)
 plt.tight_layout()
