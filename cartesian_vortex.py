@@ -35,6 +35,7 @@ green_white_pink = plts['green_white_pink']['cmap']
 green_white_brown = plts['green_white_brown']['cmap']
 green_gray_pink = plts['green_gray_pink']['cmap']
 blue_black_red = plts['blue_black_red']['cmap']
+blue_white_red = plts['blue_white_red']['cmap']
 red_black_blue = plts['red_black_blue']['cmap']
 blue_gray_red = plts['blue_gray_red']['cmap']
 divy = plts['red_black_blue']['cmap']
@@ -697,37 +698,126 @@ class VortexGrid2:
 
 
     def three_d(self):
+        # Make data.
+        Zz = test.rotation_surge_V
+        Z = test.rotation_V_scaled
         levels1 = np.arange(-2.01,2.01,0.4)
         levels2 = np.arange(-2.01,2.01,0.2)
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
+        fig = plt.figure(figsize=(12,5))
 
-        # Make data.
-        Z = test.rotation_surge_V
-        Zz = test.rotation_V_scaled
-    
-        # Plot the surface.
-        #surf = ax.plot_surface(test.xx, test.yy, Z, cmap=green_white_pink,linewidth=0, antialiased=False)
-        #surf = ax.plot_surface(test.xx, test.yy, Z, vmin=-2,vmax=2,cmap=green_gray_pink,alpha=0.25,linewidth=0, antialiased=False)    
-        #cset = ax.contourf(test.xx, test.yy, Z, vmin=-2,vmax=2,levels=levels1,zdir='z', offset=-2.5, cmap=green_gray_pink)
-
-        surf = ax.plot_surface(test.xx, test.yy, Zz,vmin=-2,vmax=2, cmap=green_gray_pink,alpha=0.2,linewidth=0, antialiased=False)    
-        cset = ax.contourf(test.xx, test.yy, Zz,vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.5, cmap=green_white_pink)    
-
-       #ax.plot_wireframe(test.xx, test.yy, Z, cmap=green_white_pink,alpha=0.3,rcount=10, ccount=0)
-        #ax.plot_wireframe(test.xx, test.yy, Zz, cmap=green_white_pink,alpha=0.3,rcount=10, ccount=0)
-        # Customize the z axis.
-        ax.grid(True)
-        #ax.axis("scaled")
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        surf = ax.plot_surface(test.xx, test.yy, Z, vmin=-2,vmax=2,cmap=green_white_pink,alpha=0.9,linewidth=0, antialiased=False)    
+        cset = ax.contourf(test.xx, test.yy, Z, vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.25, cmap=green_white_pink)
         ax.set_zlim(-2.5, 1.01)
-        #ax.zaxis.set_major_locator(LinearLocator(10))
-        #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        ax.grid(True)
+        ax.tick_params(labelsize=5)
+        ax.set_zlim(-2.5, 1.0)
         ax.set_zticks([-2, -1,0, 1])
-        ax.set_xticks([-1,0,1])
+        ax.set_xticks([-1,1])
         ax.set_yticks([-1,0,1])
+        ax.set_xbound(-1.0,1.0)
+        ax.set_ybound(-1.0,1.0)
+        ax.w_xaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_yaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_zaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.set_xlabel('Radar')
+        ax.set_zlabel('Radial Velocity')
+     
+        #ax.xaxis.pane.fill = False
+        #ax.yaxis.pane.fill = False
+        #ax.zaxis.pane.fill = False
         ax.view_init(22, 290)
-        #plt.draw()
-        #plt.pause(.001)    
+
+
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+        surf = ax.plot_surface(test.xx, test.yy, Zz,vmin=-2,vmax=2, cmap=green_white_pink,alpha=0.9,linewidth=0, antialiased=False)    
+        cset = ax.contourf(test.xx, test.yy, Zz,vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.25, cmap=green_white_pink)    
+
+        ax.grid(True)
+        ax.tick_params(labelsize=5)
+        ax.set_zlim(-2.5, 1.0)
+        ax.set_zticks([-2, -1,0, 1])
+        ax.set_xticks([-1,1])
+        ax.set_yticks([-1,0,1])
+        ax.set_xbound(-1.0,1.0)
+        ax.set_ybound(-1.0,1.0)
+        ax.w_xaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_yaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_zaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.set_xlabel('Radar')
+        ax.set_zlabel('Radial Velocity')
+        ax.view_init(22, 290)
+
+        plt.tight_layout()
+        fig_name='rotv_comp.png'
+        image_dst_path = os.path.join(image_dir,fig_name)
+        plt.savefig(image_dst_path,format='png',dpi=172,bbox_inches='tight')
+
+
+        #savefig()
+        plt.show()
+        return
+    
+
+    def three_d2(self):
+        # Make data.
+        Z = self.azshear_V_full
+        Zz = self.azshear_V_surge
+        #levels1 = np.arange(-2.01,2.01,0.4)
+        #levels2 = np.arange(-2.01,2.01,0.2)
+        levels1 = np.arange(-2.01,2.01,0.4)
+        levels2 = np.arange(-2.01,2.01,0.2)
+        fig = plt.figure(figsize=(12,5))
+
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        surf = ax.plot_surface(self.xx, self.yy, Z, vmin=-2,vmax=2,cmap=blue_white_red,alpha=0.95,linewidth=0, antialiased=False)    
+        cset = ax.contourf(self.xx, self.yy, Z, vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.25, cmap=blue_white_red)
+        ax.set_zlim(-2.5, 1.01)
+
+        ax.grid(True)
+        ax.tick_params(labelsize=5)
+        ax.set_zlim(-2.5, 1.0)
+        ax.set_zticks([-2, -1,0, 1])
+        ax.set_xticks([-1,1])
+        ax.set_yticks([-1,0,1])
+        ax.set_xbound(-1.0,1.0)
+        ax.set_ybound(-1.0,1.0)
+        ax.w_xaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_yaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_zaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.set_xlabel('Radar')
+        ax.set_zlabel('Azimuthal Shear')
+     
+        #ax.xaxis.pane.fill = False
+        #ax.yaxis.pane.fill = False
+        #ax.zaxis.pane.fill = False
+        ax.view_init(22, 290)
+
+
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+        surf = ax.plot_surface(self.xx, self.yy, Zz,vmin=-2,vmax=2, cmap=blue_white_red,alpha=0.95,linewidth=0, antialiased=False)    
+        cset = ax.contourf(self.xx, self.yy, Zz,vmin=-2,vmax=2,levels=levels2,zdir='z', offset=-2.25, cmap=blue_white_red)    
+
+        ax.grid(True)
+        ax.tick_params(labelsize=5)
+        ax.set_zlim(-2.5, 1.0)
+        ax.set_zticks([-2, -1,0, 1])
+        ax.set_xticks([-1,1])
+        ax.set_yticks([-1,0,1])
+        ax.set_xbound(-1.0,1.0)
+        ax.set_ybound(-1.0,1.0)
+        ax.w_xaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_yaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.w_zaxis.set_pane_color((0.1, 0.1, 0.1, 1.0))
+        ax.set_xlabel('Radar')
+        ax.set_zlabel('Azimuthal Shear')
+        ax.view_init(22, 290)
+
+        plt.tight_layout()
+        fig_name='az_comp.png'
+        image_dst_path = os.path.join(image_dir,fig_name)
+        plt.savefig(image_dst_path,format='png',dpi=172,bbox_inches='tight')
         # Add a color bar which maps values to colors.
         #fig.colorbar(surf, shrink=0.5, aspect=5)
         #savefig()
@@ -783,7 +873,7 @@ ax.add_artist(circle)
 ################################################################
 #test.convergence_speed_plot()
 #test.quiver_convergence_full()
-fig_name='conv_speed.png'
+#fig_name='conv_speed.png'
 ################################################################
 
 
@@ -802,9 +892,10 @@ test.quiver_convergence_V()
 
 #test.divshear_trace_plot()
 
+#test.three_d2()
 test.three_d()
 ax.set_xlim(-1.0, 1.0)
 ax.set_ylim(-1.0, 1.0)
 plt.tight_layout()
-image_dst_path = os.path.join(image_dir,fig_name)
-plt.savefig(image_dst_path,format='png',bbox_inches='tight')
+#image_dst_path = os.path.join(image_dir,fig_name)
+#plt.savefig(image_dst_path,format='png',bbox_inches='tight')
