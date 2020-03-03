@@ -418,8 +418,17 @@ class VortexGrid2:
     def rotation_convergence_V(self):
         return self.rotation_V + self.convergence_V  
 
+    def rotation_convergence_V_contour_plot(self):
+        levels = np.arange(-10,10, 1)
+        cv = self.do_contour_plot(self.rotation_convergence_V,green_white_pink,levels,0.8)
+        return cv
+
     def quiver_rotation_convergence_full(self):
         plt.quiver(self.xx[self.skip()],self.yy[self.skip()],self.rotation_convergence_U[self.skip()],self.rotation_convergence_V[self.skip()],color='k',alpha=0.5,zorder=10)
+
+
+    def quiver_rotation_convergence_V(self):
+        plt.quiver(self.xx[self.skip()],self.yy[self.skip()],0,self.rotation_convergence_V[self.skip()],color='k',alpha=0.5,zorder=10)
 
     @property
     def translation_factor(self):
@@ -855,6 +864,9 @@ ax.add_artist(circle)
 
 ################################################################
 #test.rotation_V_contour_plot()  # alpha set to 0.25
+test.rotation_convergence_V_contour_plot()
+#test.rotation_convergence_V_contour_plot()
+test.quiver_rotation_convergence_V()
 #test.rotation_V_trace_plot()    
 #test.azshear_trace_plot()
 #test.azshear_V_full_contour_plot()
@@ -868,7 +880,7 @@ ax.add_artist(circle)
 #test.azshear_surge_full_contour_plot()
 #test.rotation_V_trace_plot()    
 #test.quiver_rotation_surge()
-#fig_name='azshear_full.png'
+fig_name='rot_conv_v.png'
 #test.divshear_V_trace_plot()
 ################################################################
 #test.convergence_speed_plot()
@@ -887,15 +899,15 @@ ax.add_artist(circle)
 #test.divshear_V_trace_plot()
 #test.divshear_V_full_contour_plot()
 #test.convergence_V_contour_plot()
-test.quiver_convergence_V()
+#test.quiver_convergence_V()
 #test.rotation_V_trace_plot()
 
 #test.divshear_trace_plot()
 
 #test.three_d2()
-test.three_d()
+#test.three_d()
 ax.set_xlim(-1.0, 1.0)
 ax.set_ylim(-1.0, 1.0)
 plt.tight_layout()
-#image_dst_path = os.path.join(image_dir,fig_name)
-#plt.savefig(image_dst_path,format='png',bbox_inches='tight')
+image_dst_path = os.path.join(image_dir,fig_name)
+plt.savefig(image_dst_path,format='png',bbox_inches='tight')
