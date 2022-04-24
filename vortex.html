@@ -8,14 +8,14 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <style>
-                    td {
+    <style>
+        td {
             border: 0.1em solid #000;
             width: 60px;
             height: 30px;
             text-align: center;
         }
-        </style>
+    </style>
 
 
     <title>test</title>
@@ -135,16 +135,23 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
     </script>
     <script>
-        ctx = document.getElementById("c").getContext("2d");
-        ctx.beginPath();
-        for (var i = 0; i < 900; i += 25) {
-            for (var j = 0; j < 900; j += 25) {
-                rotation(ctx, i, j);
-            }
-        }
-        ctx.stroke();
 
-        function rotation(context, x, y) {
+
+function create_graph(conv, trans) {
+           ctx = document.getElementById("c").getContext("2d");
+           ctx.clearRect(0, 0, 600, 600);
+           ctx.beginPath();
+            for (var i = 0; i < 900; i += 25) {
+                for (var j = 0; j < 900; j += 25) {
+                    rotation(ctx, i, j, conv, trans);
+                }
+            }
+            ctx.stroke();
+
+        }
+
+
+        function rotation(context, x, y, conv, trans) {
 
             const r_max = 200;
             var headlen = 3;
@@ -155,7 +162,7 @@
             var cosa = Math.cos(angle)
             var distance = Math.sqrt(dx ** 2 + dy ** 2);
             let inner_r_coef = distance / r_max;
-            let outer_r_coef = (r_max / distance)**2;
+            let outer_r_coef = (r_max / distance) ** 2;
             var unit = 10;
 
 
@@ -165,8 +172,8 @@
                 var coef = outer_r_coef;
             }
 
-            var conv = 5;
-            var trans = 0;
+            //var conv = 5;
+            //var trans = 0;
             var fmx = x + unit * coef * sina;
             var tox = x - unit * coef * sina + trans;
             var fmy = y - unit * coef * cosa;
@@ -189,6 +196,34 @@
             context.lineTo(tox - headlen * Math.cos(new_angle + Math.PI / 6), toy - headlen * Math.sin(new_angle + Math
                 .PI / 6));
         }
+            const squares = document.querySelectorAll("td");
+
+            function get_values(id) {
+
+                var trans = parseFloat(id.slice(1, 2)) * 2;
+                var conv = parseFloat(id.slice(2, 3)) * 2;
+                console.log(conv,trans);
+                create_graph(conv, trans);
+
+            };
+
+
+            squares.forEach(square => {
+                square.addEventListener('mouseenter', e => {
+                    //getImage(e);
+                    get_values(e.target.id);
+                })
+            });
+
+//            squares.forEach(square => {
+//                square.addEventListener('mouseleave', e => {
+//                    //getImage(e);
+//                    get_values(e.target.id);
+//                })
+//            });
+
+
+
     </script>
 </body>
 
