@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+</head>
+
+<body>
+    <hr>
+    <canvas id="c" width="600" height="600"></canvas>
+    <hr>
+    <script>
+        ctx = document.getElementById("c").getContext("2d");
+        ctx.beginPath();
+        for (var i = 0; i < 900; i += 25) {
+            for (var j = 0; j < 900; j += 25) {
+                rotation(ctx, i, j);
+            }
+        }
+        ctx.stroke();
+
+        function rotation(context, x, y) {
+
+            const r_max = 200;
+            var headlen = 3;
+            var dx = 300 - x;
+            var dy = 300 - y;
+            var angle = Math.atan2(dy, dx);
+            var sina = Math.sin(angle)
+            var cosa = Math.cos(angle)
+            var distance = Math.sqrt(dx ** 2 + dy ** 2);
+            let inner_r_coef = distance / r_max;
+            let outer_r_coef = r_max / distance;
+            var unit = 10;
+
+
+            if (distance < r_max) {
+                var coef = inner_r_coef;
+            } else {
+                var coef = outer_r_coef;
+            }
+
+            var conv = 10
+            var trans = 10
+            var fmx = x + unit * coef * sina;
+            var tox = x - unit * coef * sina + trans;
+            var fmy = y - unit * coef * cosa;
+            var toy = y + unit * coef * cosa;
+
+            fmx = fmx - conv * coef * cosa;
+            tox = tox + conv * coef * cosa;
+            fmy = fmy - conv * coef * sina;
+            toy = toy + conv * coef * sina;
+
+            // new_angle is orientatin of vector instead of position from origin
+            var new_angle = Math.atan2(toy - fmy, tox - fmx)
+
+            context.moveTo(fmx, fmy);
+            context.lineTo(tox, toy);
+            context.moveTo(tox, toy);
+            context.lineTo(tox - headlen * Math.cos(new_angle - Math.PI / 6), toy - headlen * Math.sin(new_angle - Math
+                .PI / 6));
+            context.moveTo(tox, toy);
+            context.lineTo(tox - headlen * Math.cos(new_angle + Math.PI / 6), toy - headlen * Math.sin(new_angle + Math
+                .PI / 6));
+        }
+    </script>
+</body>
+
+</html>
