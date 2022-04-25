@@ -159,7 +159,7 @@
                 </tr>
             </tbody>
         </table>
-        
+
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -173,9 +173,10 @@
             for (var i = 0; i < 900; i += 25) {
                 for (var j = 0; j < 900; j += 25) {
                     rotation(ctx, i, j, conv, trans);
+
                 }
             }
-            //ctx.stroke();
+            ctx.stroke();
 
         }
 
@@ -201,8 +202,6 @@
                 var coef = outer_r_coef;
             }
 
-            //var conv = 5;
-            //var trans = 0;
             var fmx = x + unit * coef * sina;
             var tox = x - unit * coef * sina + trans;
             var fmy = y - unit * coef * cosa;
@@ -214,25 +213,13 @@
             toy = toy + conv * coef * sina;
 
             // new_angle is orientatin of vector instead of position from origin
-            var final_mag = Math.sqrt((toy - fmy)**2 + (tox - fmx)**2);
-            var strokeColor = 'rgb(100,100,200)'
-            if (final_mag > 50) {
-                strokeColor = 'rgb(200,50,0)'
-            } else if (final_mag > 30) {
-                strokeColor = 'rgb(255,92,67)'
-            } else if (final_mag > 16) {
-                strokeColor = 'rgb(224,156,27)'
-            } else if (final_mag > 14) {
-                strokeColor = 'rgb(220,247,42)'
-            } else if (final_mag > 12) {
-                strokeColor = 'rgb(27,224,100)'
-            } else if (final_mag > 10) {
-                strokeColor = 'rgb(30,157,248)'
-            } else {
-                strokeColor = 'rgb(125,125,125)'
-            }
+            var final_mag = Math.sqrt((toy - fmy) ** 2 + (tox - fmx) ** 2);
+
+            let color_calc = Math.floor(255 * final_mag / 55);
+            let color_calc_minus = 255 - color_calc;
             var new_angle = Math.atan2(toy - fmy, tox - fmx)
 
+            context.strokeColor = `rgb(${color_calc},${color_calc_minus},125)`;
             context.moveTo(fmx, fmy);
             context.lineTo(tox, toy);
             context.moveTo(tox, toy);
@@ -241,24 +228,19 @@
             context.moveTo(tox, toy);
             context.lineTo(tox - headlen * Math.cos(new_angle + Math.PI / 6), toy - headlen * Math.sin(new_angle + Math
                 .PI / 6));
-            
-            strokeColor = 'rgb(' + (25 + Math.floor(final_mag *3)) + ',' + (225 - Math.floor(final_mag *3)) + ',' + (225 - Math.floor(final_mag * 2)) + ')';
-            ctx.strokeStyle =  strokeColor;
 
-            //console.log(final_magnitude);
-            ctx.stroke();
-            }
+        }
 
 
         function get_values(id) {
-            console.log(id);
+
             var trans = parseFloat(id.slice(1, 2)) * 2;
-            var conv = parseFloat(id.slice(2, 3)) * 2;
-            var convergence = 'Convergence: ' + conv.toString();
-            var translation = 'Translation: ' + trans.toString();
-            document.getElementById('conv').innerText=convergence;
-            document.getElementById('trans').innerText=translation;
-            //console.log(conv, trans);
+            var conv = parseFloat(id.slice(2, 3)) * 2;            
+            var convergence = 'Convergence To Rotation Ratio: ' + conv.toString() + '\/10';
+            var translation = 'Translation To Rotation Ratio: ' + trans.toString() + '\/10';
+            document.getElementById('conv').innerText = convergence;
+            document.getElementById('trans').innerText = translation;
+
             create_graph(conv, trans);
 
         };
@@ -270,16 +252,16 @@
 
                 document.getElementById(e.target.id).classList.add('highlight');
                 let el = document.getElementById(e.target.id);
+                console.log(e.target.id)
                 get_values(e.target.id);
-                //getImage(el);
             })
         });
 
-                   squares.forEach(square => {
-                       square.addEventListener('mouseleave', e => {
-                        document.getElementById(e.target.id).classList.remove('highlight');
-                       })
-                   });
+        squares.forEach(square => {
+            square.addEventListener('mouseleave', e => {
+                document.getElementById(e.target.id).classList.remove('highlight');
+            })
+        });
     </script>
 </body>
 
