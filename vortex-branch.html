@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        td {
+            border: 0.1em solid #0000;
+            width: 30px;
+            height: 20px;
+            text-align: center;
+        }
+
+        .highlight {
+            /* font-weight: bold; */
+            /*min-height: 2rem; */
+            background-color: rgb(185, 185, 234);
+            /*font-weight: bold;*/
+        }
+    </style>
+
+
+    <title>test</title>
+</head>
+
+<body>
+    <div class="container">
+        <section>
+            <canvas id="c" width="600" height="600"></canvas>
+        </section>
+        <div id="conv"></div>
+        <div id="trans"></div>
+        <table id="sudoku" border="2">
+            <tbody>
+                <tr>
+                    <td id="t00" class="r"></td>
+                    <td id="t01" class="r"></td>
+                    <td id="t02" class="r"></td>
+                    <td id="t03" class="r"></td>
+                    <td id="t04" class="r"></td>
+                    <td id="t05" class="r"></td>
+                    <td id="t06" class="r"></td>
+                    <td id="t07" class="r"></td>
+                    <td id="t08" class="r"></td>
+                    <td id="t09" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t10" class="r"></td>
+                    <td id="t11" class="r"></td>
+                    <td id="t12" class="r"></td>
+                    <td id="t13" class="r"></td>
+                    <td id="t14" class="r"></td>
+                    <td id="t15" class="r"></td>
+                    <td id="t16" class="r"></td>
+                    <td id="t17" class="r"></td>
+                    <td id="t18" class="r"></td>
+                    <td id="t19" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t20" class="r"></td>
+                    <td id="t21" class="r"></td>
+                    <td id="t22" class="r"></td>
+                    <td id="t23" class="r"></td>
+                    <td id="t24" class="r"></td>
+                    <td id="t25" class="r"></td>
+                    <td id="t26" class="r"></td>
+                    <td id="t27" class="r"></td>
+                    <td id="t28" class="r"></td>
+                    <td id="t29" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t30" class="r"></td>
+                    <td id="t31" class="r"></td>
+                    <td id="t32" class="r"></td>
+                    <td id="t33" class="r"></td>
+                    <td id="t34" class="r"></td>
+                    <td id="t35" class="r"></td>
+                    <td id="t36" class="r"></td>
+                    <td id="t37" class="r"></td>
+                    <td id="t38" class="r"></td>
+                    <td id="t39" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t40" class="r"></td>
+                    <td id="t41" class="r"></td>
+                    <td id="t42" class="r"></td>
+                    <td id="t43" class="r"></td>
+                    <td id="t44" class="r"></td>
+                    <td id="t45" class="r"></td>
+                    <td id="t46" class="r"></td>
+                    <td id="t47" class="r"></td>
+                    <td id="t48" class="r"></td>
+                    <td id="t49" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t50" class="r"></td>
+                    <td id="t51" class="r"></td>
+                    <td id="t52" class="r"></td>
+                    <td id="t53" class="r"></td>
+                    <td id="t54" class="r"></td>
+                    <td id="t55" class="r"></td>
+                    <td id="t56" class="r"></td>
+                    <td id="t57" class="r"></td>
+                    <td id="t58" class="r"></td>
+                    <td id="t59" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t60" class="r"></td>
+                    <td id="t61" class="r"></td>
+                    <td id="t62" class="r"></td>
+                    <td id="t63" class="r"></td>
+                    <td id="t64" class="r"></td>
+                    <td id="t65" class="r"></td>
+                    <td id="t66" class="r"></td>
+                    <td id="t67" class="r"></td>
+                    <td id="t68" class="r"></td>
+                    <td id="t69" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t70" class="r"></td>
+                    <td id="t71" class="r"></td>
+                    <td id="t72" class="r"></td>
+                    <td id="t73" class="r"></td>
+                    <td id="t74" class="r"></td>
+                    <td id="t75" class="r"></td>
+                    <td id="t76" class="r"></td>
+                    <td id="t77" class="r"></td>
+                    <td id="t78" class="r"></td>
+                    <td id="t79" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t80" class="r"></td>
+                    <td id="t81" class="r"></td>
+                    <td id="t82" class=""></td>
+                    <td id="t83" class="r"></td>
+                    <td id="t84" class="r"></td>
+                    <td id="t85" class="r"></td>
+                    <td id="t86" class="r"></td>
+                    <td id="t87" class="r"></td>
+                    <td id="t88" class="r"></td>
+                    <td id="t89" class="r"></td>
+                </tr>
+                <tr>
+                    <td id="t90" class="r"></td>
+                    <td id="t91" class="r"></td>
+                    <td id="t92" class="r"></td>
+                    <td id="t93" class="r"></td>
+                    <td id="t94" class="r"></td>
+                    <td id="t95" class="r"></td>
+                    <td id="t96" class="r"></td>
+                    <td id="t97" class="r"></td>
+                    <td id="t98" class="r"></td>
+                    <td id="t99" class="r"></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+    </script>
+    <script>
+        class Vector {
+            constructor(id) {
+                this.id = id;
+                this.trans = parseFloat(this.id.slice(1, 2)) * 2;
+                this.conv = parseFloat(this.id.slice(2, 3)) * 2;
+                this.ctx = document.getElementById("c").getContext("2d");
+                console.log(this.conv)
+                this.convergence = 'Convergence To Rotation Ratio: ' + this.conv.toString() + '\/10';
+                this.translation = 'Translation To Rotation Ratio: ' + this.trans.toString() + '\/10';
+                document.getElementById('conv').innerText = this.convergence;
+                document.getElementById('trans').innerText = this.translation;
+
+                create_graph();
+            }
+
+
+            create_graph() {
+
+                self.ctx.clearRect(0, 0, 600, 600);
+                self.ctx.beginPath();
+                for (let i = 0; i < 900; i += 25) {
+                    for (let j = 0; j < 900; j += 25) {
+                        self.rotation(ctx, i, j, conv, trans);
+                    }
+                }
+
+            }
+
+            rotation() {
+
+                const r_max = 200;
+                var hdlen = 3;
+                var dx = 300 - x;
+                var dy = 300 - y;
+                var angle = Math.atan2(dy, dx);
+                var sina = Math.sin(angle)
+                var cosa = Math.cos(angle)
+                var distance = Math.sqrt(dx ** 2 + dy ** 2);
+                let inner_r_coef = distance / r_max;
+                let outer_r_coef = (r_max / distance) ** 2;
+                var unit = 10;
+
+
+                if (distance < r_max) {
+                    var coef = inner_r_coef;
+                } else {
+                    var coef = outer_r_coef;
+                }
+
+                self.fmx = x + unit * coef * sina;
+                self.tox = x - unit * coef * sina + self.trans;
+                self.fmy = y - unit * coef * cosa;
+                self.toy = y + unit * coef * cosa;
+
+                self.fmx = self.fmx - self.conv * coef * cosa;
+                self.tox = self.tox + self.conv * coef * cosa;
+                self.fmy = self.fmy - self.conv * coef * sina;
+                self.toy = self.toy + self.conv * coef * sina;
+
+
+                self.final_mag = Math.sqrt((self.toy - self.fmy) ** 2 + (self.tox - self.fmx) ** 2);
+
+                if (self.final_mag > 15) {
+                    self.ctx.strokeColor = 'rgb(250,100,125)';
+                } else {
+                    self.strokeColor = 'rgb(100,100, 125)';
+                };
+
+
+                let color_calc = Math.floor(255 * final_mag / 55);
+                let color_calc_minus = 255 - color_calc;
+                // new_angle is orientation of vector instead of position from origin
+                var new_angle = Math.atan2(self.toy - self.fmy, self.tox - self.fmx)
+
+                self.ctx.moveTo(self.fmx, self.fmy);
+                self.ctx.lineTo(self.tox, self.toy);
+                self.ctx.moveTo(self.tox, self.toy);
+                self.ctx.lineTo(self.tox - hdlen * Math.cos(new_angle - Math.PI / 6), self.toy - hdlen * Math.sin(
+                    new_angle -
+                    Math
+                    .PI / 6));
+                self.ctx.moveTo(self.tox, self.toy);
+                self.ctx.lineTo(self.tox - hdlen * Math.cos(new_angle + Math.PI / 6), self.toy - hdlen * Math.sin(
+                    new_angle +
+                    Math
+                    .PI / 6));
+                self.ctx.strokeColor = `rgb(${color_calc},${color_calc_minus},125)`;
+                self.ctx.stroke();
+            }
+
+            plot() {
+
+            }
+
+
+        }
+
+        const squares = document.querySelectorAll(".r");
+
+        squares.forEach(square => {
+            square.addEventListener('mouseenter', e => {
+
+                document.getElementById(e.target.id).classList.add('highlight');
+                let el = document.getElementById(e.target.id);
+                console.log(e.target.id)
+                let newVector = new Vector(e.target.id);
+            })
+        });
+
+        squares.forEach(square => {
+            square.addEventListener('mouseleave', e => {
+                document.getElementById(e.target.id).classList.remove('highlight');
+            })
+        });
+    </script>
+</body>
+
+</html>
